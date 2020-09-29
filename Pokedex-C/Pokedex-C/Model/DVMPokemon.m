@@ -26,25 +26,28 @@
 @end
 
 @implementation DVMPokemon (JSONConvertable)
+
 - (DVMPokemon *)initWithDictionary:(NSDictionary<NSString *,id> *)topLevelDictionary
 {
     NSString *name = topLevelDictionary[@"name"];
     // let name = dictionary["name"] as? String
     NSInteger identifier = [topLevelDictionary[@"id"] integerValue];
-    NSArray *abilitiesDict = topLevelDictionary[@"abilities"]; // B
+    NSArray *abilitiesDict = topLevelDictionary[@"abilities"];
     NSString *spritePath = topLevelDictionary[@"sprites"][@"front_shiny"];
 
-    if (![name isKindOfClass:[NSString class]] || ![abilitiesDict isKindOfClass:[NSArray class]]) {
+    if (![abilitiesDict isKindOfClass:[NSArray class]]) {
         return nil;
     }
+    
     NSMutableArray<NSString *> *abilities = [[NSMutableArray alloc] init];
     // let abilities : [String] = []
-    for (NSDictionary *dictionary in abilitiesDict)// B
+    for (NSDictionary *dictionary in abilitiesDict)
     {
-        NSDictionary *abilityDict = dictionary[@"ability"]; // A
+        NSDictionary *abilityDict = dictionary[@"ability"];
         NSString *abilityName = abilityDict[@"name"];
         [abilities addObject:abilityName];
     }
     return [self initWithPokemonName:name identifier:identifier abilities:abilities spritePath:spritePath];
 }
+
 @end

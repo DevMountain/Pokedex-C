@@ -23,14 +23,13 @@ static NSString * const baseURLString = @"https://pokeapi.co/api/v2/pokemon/";
 
     // Step 2) - Start my dataTask with the Completion
 
-    [[[NSURLSession sharedSession] dataTaskWithURL:finalURL completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+    [[NSURLSession.sharedSession dataTaskWithURL:finalURL completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
 
         // Was there an error
         if (error)
         {
             NSLog(@"There was an error in %s: %@, %@", __PRETTY_FUNCTION__, error, [error localizedDescription]);
-            completion(nil);
-            return;
+            return completion(nil);
         }
         // Check the response
         if (response)
@@ -38,23 +37,25 @@ static NSString * const baseURLString = @"https://pokeapi.co/api/v2/pokemon/";
             NSLog(@"%@", response);
         }
         // Get the data
-        if (data)
+        if (!data)
         {
-            NSDictionary *topLevelDictionary = [NSJSONSerialization JSONObjectWithData:data options:2 error: &error];
-
-            if (!topLevelDictionary)
-            {
-                NSLog(@"Error parsing the JSON: %@", error);
-                completion(nil);
-                return;
-            }
-            // If we made it here then I have succedfully parsed my JSON and should be able to complete with a Pokemon Object
-            DVMPokemon *pokemon = [[DVMPokemon alloc] initWithDictionary:topLevelDictionary];
-            completion(pokemon);
+            NSLog(@"No data was found.");
+            return completion(nil);
         }
+        
+        NSDictionary *topLevelDictionary = [NSJSONSerialization JSONObjectWithData:data options: NSJSONReadingAllowFragments error: &error];
+        
+        if (!topLevelDictionary)
+        {
+            NSLog(@"Error parsing the JSON: %@", error);
+            return completion(nil);
+        }
+        // If we made it here then I have succedfully parsed my JSON and should be able to complete with a Pokemon Object
+        DVMPokemon *pokemon = [[DVMPokemon alloc] initWithDictionary:topLevelDictionary];
+        completion(pokemon);
+        
     }] resume];
 }
-
 
 + (void)fetchSpriteImageForPokemon:(DVMPokemon *)pokemon completion:(void (^)(UIImage *))completion
 {
@@ -66,15 +67,13 @@ static NSString * const baseURLString = @"https://pokeapi.co/api/v2/pokemon/";
          if (error)
                {
                    NSLog(@"%@", error);
-                   completion(nil);
-                   return;
+                   return completion(nil);
                }
 
                if (!data)
                {
                    NSLog(@"%@", error);
-                   completion(nil);
-                   return;
+                   return completion(nil);
                }
 
                UIImage *image = [UIImage imageWithData:data];

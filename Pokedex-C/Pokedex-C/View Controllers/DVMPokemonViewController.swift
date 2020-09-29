@@ -9,35 +9,36 @@
 import UIKit
 
 class DVMPokemonViewController: UIViewController {
-
+    
+    //MARK: - Outlets
     @IBOutlet weak var pokemonSearchBar: UISearchBar!
     @IBOutlet weak var pokemonNameLabel: UILabel!
     @IBOutlet weak var pokemonIDLabel: UILabel!
     @IBOutlet weak var pokemonAbilitiesLabel: UILabel!
     @IBOutlet weak var pokemonSpriteImageView: UIImageView!
-
-
+    
+    //MARK: - Properties
     var pokemon: DVMPokemon?
     var spriteImage: UIImage?
-
-    override func viewWillAppear(_ animated: Bool) {
-        fetchDefaultPokemon()
-    }
+    
+    //MARK: - Lifecycle Methods
     override func viewDidLoad() {
         super.viewDidLoad()
         pokemonSearchBar.delegate = self
+        fetchPokemon(searchTerm: "146")
     }
-
+    
+    //MARK: - Helper Functions
     func updateViews() {
-         guard let pokemon = pokemon, let sprite = spriteImage else {return}
+        guard let pokemon = pokemon, let sprite = spriteImage else {return}
         pokemonNameLabel.text = pokemon.name
         pokemonIDLabel.text = "ID: \(pokemon.identifier)"
         pokemonAbilitiesLabel.text = "Abilities: " + (pokemon.abilities.joined(separator: ", "))
         pokemonSpriteImageView.image = sprite
     }
-
-    func fetchDefaultPokemon() {
-        DVMPokemonController.fetchPokemon(forSearchTerm: "12") { (pokemon) in
+    
+    func fetchPokemon(searchTerm: String) {
+        DVMPokemonController.fetchPokemon(forSearchTerm: searchTerm) { (pokemon) in
             DVMPokemonController.fetchSpriteImage(for: pokemon) { (sprite) in
                 DispatchQueue.main.async {
                     self.pokemon = pokemon
@@ -49,16 +50,9 @@ class DVMPokemonViewController: UIViewController {
     }
 }
 
+//MARK: - Extensions
 extension DVMPokemonViewController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        DVMPokemonController.fetchPokemon(forSearchTerm: searchText) { (pokemon) in
-            DVMPokemonController.fetchSpriteImage(for: pokemon) { (sprite) in
-                DispatchQueue.main.async {
-                    self.pokemon = pokemon
-                    self.spriteImage = sprite
-                    self.updateViews()
-                }
-            }
-        }
+        self.fetchPokemon(searchTerm: searchText)
     }
 }
